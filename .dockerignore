@@ -1,0 +1,14 @@
+
+# Do not copy these files into the Docker image    
+# Git folder — not needed inside container
+ .git 
+ .gitignore   
+# Environment file — contains passwords, never copy into image 
+ .env    
+# Docker files themselves — not needed inside container 
+  Dockerfile
+  docker-compose.yml
+ .dockerignore    
+# Documentation
+  README.md
+  *.md

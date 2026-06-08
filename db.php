@@ -4,10 +4,20 @@
  * DevOps Note: In production, use environment variables
  */
 
-define('DB_HOST', 'localhost');
-define('DB_USER', 'emp_user');
-define('DB_PASS', 'StrongPass@123');
+//below commands are to run and  check database in local
+//define('DB_HOST', 'localhost');
+//define('DB_USER', 'emp_user');
+//define('DB_PASS', 'StrongPass@123');
+//define('DB_NAME', 'employee_db');
+
+
+
+
+define('DB_HOST', 'php-crud-app.cxcy820mudoj.ap-south-1.rds.amazonaws.com');
+define('DB_USER', 'admin');
+define('DB_PASS', 'Mystrongpw789');
 define('DB_NAME', 'employee_db');
+
 
 // Create MySQLi connection
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
