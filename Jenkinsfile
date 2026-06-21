@@ -15,7 +15,7 @@ environment {
         DOCKER_USER = 'priyankadockrs'
 
 ## Image name
-        IMAGE_NAME = 'priyankadockrs/employee-app:v1.0'
+        IMAGE_NAME = 'priyankadockrs/employee-app'
 
 ## BUILD_NUMBER is auto-provided by Jenkins: 1, 2, 3...
         
@@ -53,7 +53,7 @@ stages {
 
 # Build with both latest and build-number tags
 
-        docker build -t priyankadockrs/employee-app:v1.0 .
+        docker build -t priyankadockrs/employee-app:latest -t priyankadockrs/employee-app:v1.0 .
         echo Image build complete docker images | grep employee-app
 '''
 }
@@ -74,8 +74,8 @@ stages {
         --password-stdin
 
         echo Pushing images...
-        docker push ${IMAGE_NAME}:latest
-        docker push ${IMAGE_NAME}:${IMAGE_TAG}
+        docker push $priyankadockrs/employee-app:latest
+        docker push $priyankadockrs/employee-app:$V1.0
         echo Push complete
 '''
 }
