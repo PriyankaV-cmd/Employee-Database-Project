@@ -1,73 +1,158 @@
 pipeline {
 
-    agent any
+## 'agent any' means: run this pipeline on the Jenkins server itself
 
-    environment {
-	DOCKER_USER = 'priyankadockrs'
-        IMAGE_NAME = "priyankadockrs/employee-app:v1.0"
-	IMAGE_TAG = "build-${BUILD_NUMBER}"
-    }
+        agent any
 
-    stages {
+## ── ENVIRONMENT VARIABLES ────────────────────────────────────
+## These variables are available in every stage below
+## withCredentials pulls from Jenkins credential store (not plain text)
 
-        stage('Clone Repository') {
+environment {
 
-            steps {
+## Your Docker Hub username
+        
+        DOCKER_USER = 'priyankadockrs'
 
-                git branch: 'main', url: 'https://github.com/PriyankaV-cmd/Employee-Database-Project.git'
+## Image name
+        IMAGE_NAME = 'priyankadockrs/employee-app:v1.0'
 
-            }
-        }
+## BUILD_NUMBER is auto-provided by Jenkins: 1, 2, 3...
+        
+        IMAGE_TAG = "build-${BUILD_NUMBER}"
 
-        stage('Build Docker Image') {
+## This pulls password from Jenkins credential store
 
-            steps {
+        DOCKER_CREDENTIALS = credentials('dockerhub-credentials')
+}
 
-                sh 'docker build -t $priyankadockrs/employee-app:v1.0 .'
+stages {
 
-            }
-        }
+## ── STAGE 1 ──────────────────────────────────────────────
 
-        stage('Push Docker Image') {
+        stage('Checkout Code')
+ {
+        steps {
 
-            steps {
+## Pull latest code from GitHub
+## Jenkins automatically knows the repo from job config checkout scm
+## Print current directory and list files
+## Good for confirming code was checked out correctly
 
-                withCredentials([usernamePassword(
+        sh 'pwd'
+        sh 'ls -la'
+        sh 'echo Code checkout complete'
+}
+}
 
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
+## ── STAGE 2 ──────────────────────────────────────────────
+  stage('Build Docker Image') {
+                steps {
+        sh '''
+        echo Building Docker image...
 
-                )]) {
+# Build with both latest and build-number tags
 
-                    sh '''
-                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+        docker build -t priyankadockrs/employee-app:v1.0 .
+        echo Image build complete docker images | grep employee-app
+'''
+}
+}
 
-                    docker push $priyankadockrs/employee-app:v1.0
-                    '''
-                }
-            }
-        }
-    }
 
-    post {
+## ── STAGE 3 ──────────────────────────────────────────────
 
+        stage('Push to Docker Hub') {
+        steps {
+        sh '''
+        echo Logging in to Docker Hub...
+## DOCKER_CREDENTIALS_USR and DOCKER_CREDENTIALS_PSW
+## are automatically created from the credentials() binding
+        echo $DOCKER_CREDENTIALS_PSW | \
+        docker login \
+        --username $DOCKER_CREDENTIALS_USR \
+        --password-stdin
+
+        echo Pushing images...
+        docker push ${IMAGE_NAME}:latest
+        docker push ${IMAGE_NAME}:${IMAGE_TAG}
+        echo Push complete
+'''
+}
+}
+
+## ── STAGE 4 ──────────────────────────────────────────────
+
+        stage('Deploy Application') {
+        steps {
+        sh '''
+        echo Deploying application...
+
+## Navigate to app directory
+        
+        cd /home/ubuntu/employee-app
+
+# Pull latest image
+
+        docker compose pull
+
+# Restart container with new image
+
+        docker compose up -d --remove-orphans
+        echo Deployment complete
+'''
+}
+}
+
+## ── STAGE 5 ──────────────────────────────────────────────
+
+        stage('Verify Deployment') {
+        steps {
+        sh '''
+        echo Verifying deployment...
+
+## Wait for container to be fully up
+        sleep 10
+
+# Check container is running
+        docker ps | grep employee-app
+
+# Test HTTP response
+        curl -I http://localhost
+        echo Verification complete - app is running!
+'''
+}
+}
+}
+
+## ── POST ACTIONS ─────────────────────────────────────────────
+## These run after ALL stages complete
+        
+        post {
+
+## Always runs — even if build failed
+        
+        always {
+        sh '''
+        echo Cleaning up Docker login session...
+        docker logout
+'''
+}
+
+
+## Only runs if all stages passed
+        
         success {
+        echo 'Pipeline completed successfully!'
+        echo 'Application deployed and verified.'
+}
 
-            emailext(
 
-                subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-
-                body: """
-                Job Name: ${env.JOB_NAME}
-
-                Build Number: ${env.BUILD_NUMBER}
-
-                Build Status: SUCCESS
-                """,
-
-                to: "ptechvishwa@gmail.com"
-            )
-        }
-    }
+## Only runs if any stage failed
+        
+        failure {
+        echo 'Pipeline FAILED!'
+        echo 'Check Console Output for error details.'
+}
+}
 }
