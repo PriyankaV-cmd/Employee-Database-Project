@@ -3,7 +3,9 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "priyankadockrs/employee-app"
+	DOCKER_USER = 'priyankadockrs'
+        IMAGE_NAME = "priyankadockrs/employee-app:v1.0"
+	IMAGE_TAG = "build-${BUILD_NUMBER}"
     }
 
     stages {
@@ -21,7 +23,7 @@ pipeline {
 
             steps {
 
-                sh 'docker build -t $IMAGE_NAME:latest .'
+                sh 'docker build -t $priyankadockrs/employee-app:v1.0 .'
 
             }
         }
@@ -41,7 +43,7 @@ pipeline {
                     sh '''
                     echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
 
-                    docker push $IMAGE_NAME:latest
+                    docker push $priyankadockrs/employee-app:v1.0
                     '''
                 }
             }
@@ -64,7 +66,7 @@ pipeline {
                 Build Status: SUCCESS
                 """,
 
-                to: "yashdagar365@gmail.com"
+                to: "ptechvishwa@gmail.com"
             )
         }
     }
