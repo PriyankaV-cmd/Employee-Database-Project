@@ -54,7 +54,6 @@ pipeline {
                 sh '''
                 echo Deploying application...
                 cd /home/ubuntu/employee-app
-
                 docker compose pull
                 docker compose up -d --remove-orphans
                 echo Deployment complete
@@ -75,21 +74,23 @@ pipeline {
             }
         }
 
-        // New cleanup stage
-        stage('Cleanup') {
-            steps {
-                sh '''
-                echo Cleaning up Docker login session...
-                docker logout
-                '''
-            }
-        }
     }
 
     post {
         success {
             echo 'Pipeline completed successfully!'
             echo 'Application deployed and verified.'
+
+	// ✅ Email notification on success
+            emailext(
+                subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                Job Name: ${env.JOB_NAME}
+                Build Number: ${env.BUILD_NUMBER}
+                Build Status: SUCCESS
+                """,
+                to: "ptechvishwa@gmail.com"
+            )
         }
 
         failure {
