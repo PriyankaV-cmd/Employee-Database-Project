@@ -74,18 +74,19 @@ pipeline {
                 '''
             }
         }
-    }
 
-    post {
-        always {
-            script {
+        // New cleanup stage
+        stage('Cleanup') {
+            steps {
                 sh '''
                 echo Cleaning up Docker login session...
                 docker logout
                 '''
             }
         }
+    }
 
+    post {
         success {
             echo 'Pipeline completed successfully!'
             echo 'Application deployed and verified.'
