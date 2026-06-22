@@ -2,23 +2,22 @@ pipeline {
     agent any
 
     environment {
-        // Your Docker Hub username
+        // Docker Hub username
         DOCKER_USER = 'priyankadockrs'
 
         // Image name
         IMAGE_NAME = 'priyankadockrs/employee-app'
 
-        // BUILD_NUMBER is auto-provided by Jenkins: 1, 2, 3...
+        // BUILD_NUMBER is auto-provided by Jenkins
         IMAGE_TAG = "build-${BUILD_NUMBER}"
 
-        // This pulls password from Jenkins credential store
+        // Credentials binding from Jenkins store
         DOCKER_CREDENTIALS = credentials('dockerhub-credentials')
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                // Pull latest code from GitHub
                 sh 'pwd'
                 sh 'ls -la'
                 sh 'echo Code checkout complete'
@@ -77,14 +76,15 @@ pipeline {
         }
     }
 
-    stage('Cleanup') {
-    steps {
-        sh '''
-        echo Cleaning up Docker login session...
-        docker logout
-        '''
-    }
-}
+    post {
+        always {
+            script {
+                sh '''
+                echo Cleaning up Docker login session...
+                docker logout
+                '''
+            }
+        }
 
         success {
             echo 'Pipeline completed successfully!'
@@ -96,4 +96,4 @@ pipeline {
             echo 'Check Console Output for error details.'
         }
     }
-
+}
