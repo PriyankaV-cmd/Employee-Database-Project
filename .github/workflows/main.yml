@@ -22,4 +22,4 @@ jobs:
             chmod +x deploy.sh
             ./deploy.sh
       - name: Test SSH
-        run: ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.HOST }} echo "Connected!"
+        run: ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} echo "Connected!"
