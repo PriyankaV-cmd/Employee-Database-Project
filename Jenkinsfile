@@ -1,6 +1,5 @@
 pipeline {
-
-## agent any means run the pipeline on the Jenkins server itself
+##agent any means run the pipeline on the Jenkins server itself
 
         agent any
 
