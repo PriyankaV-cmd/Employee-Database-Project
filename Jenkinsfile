@@ -77,13 +77,14 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            sh '''
-            echo Cleaning up Docker login session...
-            docker logout
-            '''
-        }
+    stage('Cleanup') {
+    steps {
+        sh '''
+        echo Cleaning up Docker login session...
+        docker logout
+        '''
+    }
+}
 
         success {
             echo 'Pipeline completed successfully!'
