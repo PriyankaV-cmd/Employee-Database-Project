@@ -21,5 +21,3 @@ jobs:
             cd /var/www/html/employee-app
             chmod +x deploy.sh
             ./deploy.sh
-      - name: Test SSH
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} echo "Connected!"
